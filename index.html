@@ -1017,6 +1017,22 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleSearchButton();
     }
 
+    function showCouponPopup(card) {
+        const examCode = card.getAttribute('data-exam-code');
+        const examName = card.querySelector('h3').textContent;
+        
+        const popup = document.getElementById('couponPopup');
+        const examCategorySelect = document.getElementById('couponCategory');
+        
+        examCategorySelect.value = examCode;
+        
+        popup.classList.add('active');
+        
+        document.getElementById('couponName').value = '';
+        document.getElementById('couponEmail').value = '';
+        document.getElementById('successMessagePopup').style.display = 'none';
+    }
+
     function performSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         
@@ -1034,6 +1050,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (title.includes(searchTerm) || categories.includes(searchTerm)) {
                 const cardClone = card.cloneNode(true);
+                const couponBtn = cardClone.querySelector('.coupon-btn');
+                couponBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showCouponPopup(card);
+                });
                 resultsContainer.appendChild(cardClone);
                 hasResults = true;
             }
@@ -1071,26 +1092,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.coupon-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            
-            // Get the exam details from the card
             const card = this.closest('.card');
-            const examCode = card.getAttribute('data-exam-code');
-            const examName = card.querySelector('h3').textContent;
-            
-            // Set up the popup
-            const popup = document.getElementById('couponPopup');
-            const examCategorySelect = document.getElementById('couponCategory');
-            
-            // Set the exam category in the form
-            examCategorySelect.value = examCode;
-            
-            // Show the popup
-            popup.classList.add('active');
-            
-            // Reset form if it was previously submitted
-            document.getElementById('couponName').value = '';
-            document.getElementById('couponEmail').value = '';
-            document.getElementById('successMessagePopup').style.display = 'none';
+            showCouponPopup(card);
         });
     });
 
@@ -1126,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = {
             name: name,
             email: email,
-            category: examCategoryText  // Sending the display text instead of code
+            category: examCategoryText
         };
         
         // Show loading state
@@ -1162,20 +1165,6 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('There was an error submitting your request. Please try again.');
             submitBtn.disabled = false;
             submitBtn.textContent = 'Get My Coupon Code';
-        });
-    });
-
-    // Initialize form validation
-    const couponForm = document.getElementById('couponForm');
-    const inputs = couponForm.querySelectorAll('input, select');
-    
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            if (this.checkValidity()) {
-                this.classList.remove('invalid');
-            } else {
-                this.classList.add('invalid');
-            }
         });
     });
 });
