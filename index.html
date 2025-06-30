@@ -939,24 +939,22 @@
     </div>
 </div>
     <script> 
-// Coupon button click handler - updated version
+    // Replace the existing coupon button click event with this:
 document.querySelectorAll('.coupon-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
         e.preventDefault();
-        e.stopPropagation();
         
-        // Get the exam details from the card
+        // Get the exam category from the card
         const card = this.closest('.card');
         const examTitle = card.querySelector('h3').textContent;
         const examDiscount = card.querySelector('p').textContent;
-        const examCategories = card.getAttribute('data-categories');
         
         // Set up the popup
         const popup = document.getElementById('couponPopup');
         const examCategoryInput = document.getElementById('couponCategory');
         
-        // Set the exam category in the form with proper formatting
-        examCategoryInput.value = `${examTitle}`;
+        // Set the exam category in the form
+        examCategoryInput.value = `${examTitle} (${examDiscount})`;
         
         // Show the popup
         popup.classList.add('active');
@@ -964,35 +962,32 @@ document.querySelectorAll('.coupon-btn').forEach(btn => {
         // Reset form if it was previously submitted
         document.getElementById('couponForm').reset();
         document.getElementById('successMessagePopup').style.display = 'none';
-        
-        // Store the exam details in data attributes for form submission
-        examCategoryInput.dataset.examTitle = examTitle;
-        examCategoryInput.dataset.examDiscount = examDiscount;
-        examCategoryInput.dataset.examCategories = examCategories;
     });
 });
-// Form submission - updated version
+
+// Close popup functionality
+document.getElementById('closePopup').addEventListener('click', function() {
+    document.getElementById('couponPopup').classList.remove('active');
+});
+
+// Close popup when clicking outside
+document.getElementById('couponPopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.remove('active');
+    }
+});
+
+// Form submission
 document.getElementById('couponForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     // Get form values
     const name = document.getElementById('couponName').value;
     const email = document.getElementById('couponEmail').value;
-    const examCategoryInput = document.getElementById('couponCategory');
+    const examCategory = document.getElementById('couponCategory').value;
     
-    // Get the stored exam details
-    const examTitle = examCategoryInput.dataset.examTitle;
-    const examDiscount = examCategoryInput.dataset.examDiscount;
-    const examCategories = examCategoryInput.dataset.examCategories;
-    
-    // Here you can use all these values to send to your backend
-    console.log({
-        name,
-        email,
-        examTitle,
-        examDiscount,
-        examCategories
-    });
+    // Here you would typically send this data to your server/Google Apps Script
+    // For now, we'll simulate a successful submission
     
     // Show success message
     document.getElementById('successMessagePopup').style.display = 'block';
@@ -1004,7 +999,117 @@ document.getElementById('couponForm').addEventListener('submit', function(e) {
     setTimeout(() => {
         document.getElementById('couponPopup').classList.remove('active');
     }, 3000);
+    
+    // In a real implementation, you would call your Google Apps Script here
+    // Similar to the example I provided earlier for form submission
+    // fetch('YOUR_GOOGLE_SCRIPT_URL', {
+    //     method: 'POST',
+    //     body: JSON.stringify({name, email, examCategory}),
+    //     // ...
+    // });
 });
+document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const toggler = document.getElementById('navbar-toggler');
+            const navbarNav = document.getElementById('navbarNav');
+            
+            toggler.addEventListener('click', function() {
+                navbarNav.classList.toggle('show');
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchResults = document.getElementById('searchResults');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const allCoupons = document.getElementById('allCoupons');
+            const noResults = document.getElementById('noResults');
+            const cards = document.querySelectorAll('.card');
+
+            let isInSearchMode = false;
+
+            function toggleSearchButton() {
+                if (isInSearchMode) {
+                    searchButton.classList.add('clear-mode');
+                } else {
+                    searchButton.classList.remove('clear-mode');
+                }
+            }
+
+            function clearSearch() {
+                searchInput.value = '';
+                searchResults.style.display = 'none';
+                noResults.style.display = 'none';
+                allCoupons.style.display = 'grid';
+                isInSearchMode = false;
+                toggleSearchButton();
+            }
+
+            function performSearch() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                
+                if (searchTerm === '') {
+                    clearSearch();
+                    return;
+                }
+                
+                let hasResults = false;
+                resultsContainer.innerHTML = '';
+                
+                cards.forEach(card => {
+                    const title = card.querySelector('h3').textContent.toLowerCase();
+                    const categories = card.getAttribute('data-categories').toLowerCase();
+                    
+                    if (title.includes(searchTerm) || categories.includes(searchTerm)) {
+                        const cardClone = card.cloneNode(true);
+                        resultsContainer.appendChild(cardClone);
+                        hasResults = true;
+                    }
+                });
+                
+                if (hasResults) {
+                    searchResults.style.display = 'block';
+                    noResults.style.display = 'none';
+                    allCoupons.style.display = 'none';
+                } else {
+                    searchResults.style.display = 'none';
+                    noResults.style.display = 'block';
+                    allCoupons.style.display = 'none';
+                }
+                
+                isInSearchMode = true;
+                toggleSearchButton();
+            }
+
+            searchButton.addEventListener('click', function() {
+                if (isInSearchMode) {
+                    clearSearch();
+                } else {
+                    performSearch();
+                }
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Coupon button animation
+            document.querySelectorAll('.coupon-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    this.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+                    }, 2000);
+                });
+            });
+        });
     </script>
 </body>  
 </html>
