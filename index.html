@@ -1151,16 +1151,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const successMessage = document.getElementById('successMessagePopup');
             successMessage.style.display = 'block';
             
-            // Reset form
-            this.reset();
-            
             // Close popup after showing success message for 2 seconds
             setTimeout(() => {
                 document.getElementById('couponPopup').classList.remove('active');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Get My Coupon Code';
                 successMessage.style.display = 'none';
-            }, 2000);
+            }, 8000);
         })
         .catch(error => {
             console.error('Error:', error);
