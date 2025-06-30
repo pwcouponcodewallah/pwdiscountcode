@@ -472,6 +472,142 @@
         #searchButton.clear-mode span {
             display: none;
         }
+        /* Form Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-form {
+    background-color: white;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.popup-overlay.active .popup-form {
+    transform: translateY(0);
+}
+
+.close-popup {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: #6c757d;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-popup:hover {
+    color: var(--accent);
+}
+
+.form-title {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--primary);
+    font-size: 1.5rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.form-title:after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.form-group input, 
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+    outline: none;
+}
+
+.form-group .disabled-input {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #5a0cb0, #1a68e8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.success-message-popup {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 5px;
+    margin-top: 20px;
+    border: 1px solid #c3e6cb;
+}
     </style>  
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">  
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -766,115 +902,109 @@
                     <p>New Delhi, India</p>  
                 </div>  
             </div>  
+            
             <div class="copyright">  
                 &copy; 2023 PW Coupon Wallah. All Rights Reserved.  
             </div>  
         </div>  
     </footer>  
-      
-    <script>  
-document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu toggle
-            const toggler = document.getElementById('navbar-toggler');
-            const navbarNav = document.getElementById('navbarNav');
+      <!-- Coupon Form Popup -->
+<div class="popup-overlay" id="couponPopup">
+    <div class="popup-form">
+        <span class="close-popup" id="closePopup">&times;</span>
+        <h2 class="form-title">Get Your Coupon</h2>
+        
+        <form id="couponForm">
+            <div class="form-group">
+                <label for="couponName">Full Name</label>
+                <input type="text" id="couponName" name="name" required>
+            </div>
             
-            toggler.addEventListener('click', function() {
-                navbarNav.classList.toggle('show');
-            });
-
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            const searchResults = document.getElementById('searchResults');
-            const resultsContainer = document.getElementById('resultsContainer');
-            const allCoupons = document.getElementById('allCoupons');
-            const noResults = document.getElementById('noResults');
-            const cards = document.querySelectorAll('.card');
-
-            let isInSearchMode = false;
-
-            function toggleSearchButton() {
-                if (isInSearchMode) {
-                    searchButton.classList.add('clear-mode');
-                } else {
-                    searchButton.classList.remove('clear-mode');
-                }
-            }
-
-            function clearSearch() {
-                searchInput.value = '';
-                searchResults.style.display = 'none';
-                noResults.style.display = 'none';
-                allCoupons.style.display = 'grid';
-                isInSearchMode = false;
-                toggleSearchButton();
-            }
-
-            function performSearch() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                
-                if (searchTerm === '') {
-                    clearSearch();
-                    return;
-                }
-                
-                let hasResults = false;
-                resultsContainer.innerHTML = '';
-                
-                cards.forEach(card => {
-                    const title = card.querySelector('h3').textContent.toLowerCase();
-                    const categories = card.getAttribute('data-categories').toLowerCase();
-                    
-                    if (title.includes(searchTerm) || categories.includes(searchTerm)) {
-                        const cardClone = card.cloneNode(true);
-                        resultsContainer.appendChild(cardClone);
-                        hasResults = true;
-                    }
-                });
-                
-                if (hasResults) {
-                    searchResults.style.display = 'block';
-                    noResults.style.display = 'none';
-                    allCoupons.style.display = 'none';
-                } else {
-                    searchResults.style.display = 'none';
-                    noResults.style.display = 'block';
-                    allCoupons.style.display = 'none';
-                }
-                
-                isInSearchMode = true;
-                toggleSearchButton();
-            }
-
-            searchButton.addEventListener('click', function() {
-                if (isInSearchMode) {
-                    clearSearch();
-                } else {
-                    performSearch();
-                }
-            });
-
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    performSearch();
-                }
-            });
-
-            // Coupon button animation
-            document.querySelectorAll('.coupon-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const originalText = this.textContent;
-                    this.textContent = 'Copied!';
-                    this.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-                    
-                    setTimeout(() => {
-                        this.textContent = originalText;
-                        this.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
-                    }, 2000);
-                });
-            });
-        });
+            <div class="form-group">
+                <label for="couponEmail">Email Address</label>
+                <input type="email" id="couponEmail" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="couponCategory">Exam Category</label>
+                <input type="text" id="couponCategory" class="disabled-input" readonly>
+            </div>
+            
+            <button type="submit" class="submit-btn">Get My Coupon Code</button>
+            
+            <div class="success-message-popup" id="successMessagePopup">
+                Thank you! Your coupon code has been sent to your email address.
+            </div>
+        </form>
+    </div>
+</div>
+    <script> 
+// Coupon button click handler - updated version
+document.querySelectorAll('.coupon-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Get the exam details from the card
+        const card = this.closest('.card');
+        const examTitle = card.querySelector('h3').textContent;
+        const examDiscount = card.querySelector('p').textContent;
+        const examCategories = card.getAttribute('data-categories');
+        
+        // Set up the popup
+        const popup = document.getElementById('couponPopup');
+        const examCategoryInput = document.getElementById('couponCategory');
+        
+        // Set the exam category in the form with proper formatting
+        examCategoryInput.value = `${examTitle}`;
+        
+        // Show the popup
+        popup.classList.add('active');
+        
+        // Reset form if it was previously submitted
+        document.getElementById('couponForm').reset();
+        document.getElementById('successMessagePopup').style.display = 'none';
+        
+        // Store the exam details in data attributes for form submission
+        examCategoryInput.dataset.examTitle = examTitle;
+        examCategoryInput.dataset.examDiscount = examDiscount;
+        examCategoryInput.dataset.examCategories = examCategories;
+    });
+});
+// Form submission - updated version
+document.getElementById('couponForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const name = document.getElementById('couponName').value;
+    const email = document.getElementById('couponEmail').value;
+    const examCategoryInput = document.getElementById('couponCategory');
+    
+    // Get the stored exam details
+    const examTitle = examCategoryInput.dataset.examTitle;
+    const examDiscount = examCategoryInput.dataset.examDiscount;
+    const examCategories = examCategoryInput.dataset.examCategories;
+    
+    // Here you can use all these values to send to your backend
+    console.log({
+        name,
+        email,
+        examTitle,
+        examDiscount,
+        examCategories
+    });
+    
+    // Show success message
+    document.getElementById('successMessagePopup').style.display = 'block';
+    
+    // Reset form
+    this.reset();
+    
+    // Close popup after 3 seconds
+    setTimeout(() => {
+        document.getElementById('couponPopup').classList.remove('active');
+    }, 3000);
+});
     </script>
 </body>  
 </html>
